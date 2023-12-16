@@ -14,7 +14,47 @@ class AuthController extends Controller
     {
         $this->middleware('auth:api', ['except' => ['login','register','refresh','logout']]);
     }
-
+    /**
+     * @OA\Post(
+     *     path="/api/register",
+     *     operationId="register",
+     *     tags={"Authentication"},
+     *     summary="Register a new user",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         description="User registration data",
+     *         @OA\JsonContent(
+     *             required={"name","email","password"},
+     *             @OA\Property(property="name", type="string"),
+     *             @OA\Property(property="email", type="string"),
+     *             @OA\Property(property="password", type="string", format="password"),
+     *         ),
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful registration",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="string", example="success"),
+     *             @OA\Property(property="message", type="string", example="User created successfully"),
+     *             @OA\Property(property="user", type="object", ref="#/components/schemas/User"),
+     *             @OA\Property(
+     *                 property="authorisation",
+     *                 type="object",
+     *                 @OA\Property(property="token", type="string", example="your_token"),
+     *                 @OA\Property(property="type", type="string", example="bearer"),
+     *             ),
+     *         ),
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Internal server error",
+     *     ),
+     * )
+     */
     public function register(Request $request){
         $request->validate([
             'name' => 'required|string|max:255',
@@ -39,7 +79,41 @@ class AuthController extends Controller
             ]
         ]);
     }
-
+    /**
+     * @OA\Post(
+     *     path="/api/login",
+     *     operationId="login",
+     *     tags={"Authentication"},
+     *     summary="User login",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         description="User login data",
+     *         @OA\JsonContent(
+     *             required={"email","password"},
+     *             @OA\Property(property="email", type="string"),
+     *             @OA\Property(property="password", type="string", format="password"),
+     *         ),
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful login",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="string", example="success"),
+     *             @OA\Property(property="user", type="object", ref="#/components/schemas/User"),
+     *             @OA\Property(
+     *                 property="authorisation",
+     *                 type="object",
+     *                 @OA\Property(property="token", type="string", example="your_token"),
+     *                 @OA\Property(property="type", type="string", example="bearer"),
+     *             ),
+     *         ),
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized",
+     *     ),
+     * )
+     */
     public function login(Request $request)
     {
         $request->validate([
@@ -68,6 +142,22 @@ class AuthController extends Controller
 
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/logout",
+     *     operationId="logout",
+     *     tags={"Authentication"},
+     *     summary="User logout",
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successfully logged out",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="string", example="success"),
+     *             @OA\Property(property="message", type="string", example="Successfully logged out"),
+     *         ),
+     *     ),
+     * )
+     */
     public function logout()
     {
         Auth::guard('api')->logout();
@@ -77,7 +167,28 @@ class AuthController extends Controller
         ]);
     }
 
-
+    /**
+     * @OA\Post(
+     *     path="/api/refresh",
+     *     operationId="refresh",
+     *     tags={"Authentication"},
+     *     summary="Refresh JWT token",
+     *     @OA\Response(
+     *         response=200,
+     *         description="Token refreshed successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="string", example="success"),
+     *             @OA\Property(property="user", type="object", ref="#/components/schemas/User"),
+     *             @OA\Property(
+     *                 property="authorisation",
+     *                 type="object",
+     *                 @OA\Property(property="token", type="string", example="your_refreshed_token"),
+     *                 @OA\Property(property="type", type="string", example="bearer"),
+     *             ),
+     *         ),
+     *     ),
+     * )
+     */
     public function refresh()
     {
         return response()->json([
